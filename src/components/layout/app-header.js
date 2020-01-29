@@ -1,9 +1,6 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
+import { AppBar, Toolbar, Typography, IconButton, Link } from '@material-ui/core';
 import Brightness7Icon from '@material-ui/icons/Brightness7';
 
 const useStyles = makeStyles(theme => ({
@@ -21,8 +18,10 @@ export default function AppHeader({ onToggleTheme }) {
     <div className={classes.main}>
       <AppBar position='static'>
         <Toolbar>
-          <Typography variant='h6' className={classes.title}>
-            News
+          <Typography variant='h5' className={classes.title}>
+            <Link href='#' underline='none' color='textSecondary'>
+              project wag
+            </Link>
           </Typography>
           <IconButton color='inherit' onClick={onToggleTheme}>
             <Brightness7Icon />

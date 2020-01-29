@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { AppHeader, AppMain } from '../components/layout';
-import {
-  makeStyles,
-  MuiThemeProvider,
-  createMuiTheme,
-} from '@material-ui/core/styles';
+import { makeStyles, MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 const lightTheme = createMuiTheme({
   palette: {
@@ -13,15 +9,16 @@ const lightTheme = createMuiTheme({
       default: '#FFFFFF',
     },
     primary: {
-      light: '#03DAC6',
-      main: '#018786',
-    },
-    secondary: {
       main: '#6200EE',
       dark: '#3700B3',
     },
+    secondary: {
+      light: '#03DAC6',
+      main: '#018786',
+    },
     text: {
       primary: '#000000',
+      secondary: '#F1f1f1',
       error: '#B00020',
     },
   },
@@ -32,6 +29,9 @@ const darkTheme = createMuiTheme({
     type: 'dark',
     background: {
       default: '#121212',
+      fiveperc: '#1D1D1D',
+      sevenperc: '#212121',
+      eightperc: '#242424',
     },
     primary: {
       main: '#03DAC6',
@@ -42,23 +42,20 @@ const darkTheme = createMuiTheme({
     },
     text: {
       primary: '#f1f1f1',
+      secondary: '#121212',
       error: '#CF6679',
     },
   },
 });
 
 const useStyles = makeStyles(theme => ({
-  main: {
-    backgroundColor: theme.palette.background.default,
-    color: theme.palette.text.primary,
-  },
-  app: {
+  appContent: {
     backgroundColor: theme.palette.background.default,
     fontSize: 'calc(10px + 2vmin)',
     color: theme.palette.text.primary,
     width: '100%',
   },
-  appMain: {
+  app: {
     display: 'flex',
     width: '100%',
     height: '100%',
@@ -68,16 +65,16 @@ const useStyles = makeStyles(theme => ({
 const Main = ({ onToggleTheme }) => {
   const classes = useStyles();
   return (
-    <div className={classes.app}>
+    <div className={classes.appContent}>
       <AppHeader onToggleTheme={onToggleTheme} />
-      <AppMain classes={classes} />
+      <AppMain />
     </div>
   );
 };
 
 export default function App() {
   const classes = useStyles();
-  const [theme, setTheme] = useState(lightTheme);
+  const [theme, setTheme] = useState(darkTheme);
 
   const ToggleTheme = () => {
     let newTheme = theme.palette.type === 'light' ? darkTheme : lightTheme;
@@ -86,8 +83,8 @@ export default function App() {
 
   return (
     <MuiThemeProvider theme={theme}>
-      <div className={classes.appMain}>
-        <Main classes={classes} onToggleTheme={ToggleTheme} />
+      <div className={classes.app}>
+        <Main onToggleTheme={ToggleTheme} />
       </div>
     </MuiThemeProvider>
   );
