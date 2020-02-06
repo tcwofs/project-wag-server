@@ -1,7 +1,9 @@
-import React from 'react';
+import { AppBar, IconButton, Link, Toolbar, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { AppBar, Toolbar, Typography, IconButton, Link } from '@material-ui/core';
 import Brightness7Icon from '@material-ui/icons/Brightness7';
+import React, { useContext } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
+import { Context } from '../../app';
 
 const useStyles = makeStyles(theme => ({
   main: {
@@ -12,18 +14,20 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function AppHeader({ onToggleTheme }) {
+export default function AppHeader() {
   const classes = useStyles();
+  const { toggleTheme } = useContext(Context);
+
   return (
     <div className={classes.main}>
       <AppBar position='static'>
         <Toolbar>
           <Typography variant='h5' className={classes.title}>
-            <Link href='#' underline='none' color='textSecondary'>
+            <Link component={RouterLink} to='/' underline='none' color='textSecondary'>
               project wag
             </Link>
           </Typography>
-          <IconButton color='inherit' onClick={onToggleTheme}>
+          <IconButton color='inherit' onClick={toggleTheme}>
             <Brightness7Icon />
           </IconButton>
         </Toolbar>

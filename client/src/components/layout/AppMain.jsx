@@ -11,6 +11,7 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     justifyContent: 'center',
     paddingTop: '1vh',
+    paddingBottom: '1vh',
   },
 }));
 
@@ -21,21 +22,29 @@ function AppMain() {
       id: 1,
       img: 'https://img.mobiscroll.com/demos/gridlayout/toucan.jpg',
       name: 'chat',
+      overview: 'A chat',
+      path: '/chat',
     },
     {
       id: 2,
       img: 'https://img.mobiscroll.com/demos/gridlayout/kingfisher.jpg',
       name: 'rps',
+      overview: 'A rps game',
+      path: '/rps',
     },
     {
       id: 3,
       img: 'https://img.mobiscroll.com/demos/gridlayout/swift.jpg',
       name: 'durak',
+      overview: 'A durak game',
+      path: '/durak',
     },
     {
       id: 4,
       img: 'https://img.mobiscroll.com/demos/gridlayout/humming.jpg',
       name: 'tic-tac-toe',
+      overview: 'A tic-tac-toe game',
+      path: '/ttt',
     },
   ];
 

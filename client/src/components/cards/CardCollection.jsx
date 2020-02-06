@@ -1,8 +1,7 @@
+import { Grid, Paper } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import React from 'react';
 import { CardInstance } from './index';
-import { makeStyles } from '@material-ui/core/styles';
-import { Paper, Grid } from '@material-ui/core';
-
 const useStyles = makeStyles(theme => ({
   paper: {
     padding: '20px',

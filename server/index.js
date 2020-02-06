@@ -1,19 +1,27 @@
 /* eslint-disable strict */
 'use strict';
 const express = require('express');
-const path = require('path');
 const app = express();
+
+const PORT = process.env.port || 5000;
+
+const router = require('./router');
 
 const http = require('http');
 const server = http.createServer(app);
 
 const io = require('socket.io').listen(server);
 
-// app.use(express.static(path.join(__dirname, '../build')));
-// app.get('/*', function(req, res) {
-//   res.sendFile(path.join(__dirname, 'build', 'index.html'));
-// });
+io.on('connection', socket => {
+  console.log('We have a new connection');
 
-server.listen(5000, function() {
-  console.log(`Running on port 5000!`);
+  socket.on('disconnect', () => {
+    console.log('User left!');
+  });
+});
+
+app.use(router);
+
+server.listen(PORT, () => {
+  console.log(`Running on port ${PORT}!`);
 });
