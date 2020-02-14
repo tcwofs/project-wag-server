@@ -1,7 +1,5 @@
 import React from 'react';
 
-function ChatComp() {
+export default () => {
   return <div>chat</div>;
-}
-
-export default ChatComp;
+};

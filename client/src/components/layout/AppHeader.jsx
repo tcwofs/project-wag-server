@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Brightness7Icon from '@material-ui/icons/Brightness7';
 import React, { useContext } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { Context } from '../../app';
+import { AppContext } from '../../app';
 
 const useStyles = makeStyles(theme => ({
   main: {
@@ -16,7 +16,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function AppHeader() {
   const classes = useStyles();
-  const { toggleTheme } = useContext(Context);
+  const { switchTheme } = useContext(AppContext);
 
   return (
     <div className={classes.main}>
@@ -27,7 +27,7 @@ export default function AppHeader() {
               project wag
             </Link>
           </Typography>
-          <IconButton color='inherit' onClick={toggleTheme}>
+          <IconButton color='inherit' onClick={switchTheme}>
             <Brightness7Icon />
           </IconButton>
         </Toolbar>
