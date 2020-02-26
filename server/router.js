@@ -1,5 +1,7 @@
+'use strict';
 const express = require('express');
 const router = express.Router();
+const services = require('./services.json');
 // const path = require('path');
 
 router.get('/', (req, res) => {
@@ -10,5 +12,9 @@ router.get('/', (req, res) => {
 // router.get('/*', function(req, res) {
 //   res.sendFile(path.join(__dirname, 'build', 'index.html'));
 // });
+
+router.get('/api/services', (req, res) => {
+  res.json(services);
+});
 
 module.exports = router;

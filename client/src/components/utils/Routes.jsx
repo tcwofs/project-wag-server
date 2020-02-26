@@ -35,6 +35,9 @@ export default () => {
           <Route path='/ttt'>
             <TTTView />
           </Route>
+          <Route>
+            <AppMain />
+          </Route>
         </Switch>
       </Router>
     </div>

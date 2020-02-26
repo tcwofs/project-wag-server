@@ -1,18 +1,9 @@
 import { AppBar, IconButton, Link, Toolbar, Typography } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
 import Brightness7Icon from '@material-ui/icons/Brightness7';
 import React, { useContext } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { AppContext } from '../../app';
-
-const useStyles = makeStyles(theme => ({
-  main: {
-    flexGrow: 1,
-  },
-  title: {
-    flexGrow: 1,
-  },
-}));
+import { useStyles } from './AppHeader.styles';
 
 export default function AppHeader() {
   const classes = useStyles();

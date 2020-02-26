@@ -1,0 +1,16 @@
+{
+  "name": "project-wag",
+  "version": "0.1.0",
+  "repository": "git@github.com:tcwofs/project-wag.git",
+  "author": "tcwofs <tcwofs@users.noreply.github.com>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "npmClientInstall": "cd client && npm install && cd -",
+    "npmServerInstall": "cd server && npm install && cd -",
+    "yarnClientInstall": "cd client && yarn install && cd -",
+    "yarnServerInstall": "cd server && yarn install && cd -",
+    "client": "cd client && npm start",
+    "server": "cd server && npm start"
+  }
+}
