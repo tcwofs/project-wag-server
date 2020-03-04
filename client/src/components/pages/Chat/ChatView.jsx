@@ -13,11 +13,9 @@ export default props => {
   const ENDPOINT = 'http://localhost:3000/chat';
 
   useEffect(() => {
-    socket = io(ENDPOINT, error => {
-      console.error(error);
-    });
+    socket = io(ENDPOINT);
 
-    socket.emit('join', { username, room }, () => {});
+    socket.emit('join', { username, room });
 
     return () => {
       socket.disconnect();
@@ -38,8 +36,6 @@ export default props => {
       socket.emit('sendMessage', message, () => setMessage(''));
     }
   };
-
-  console.log(message, messages);
 
   return (
     <div className={classes.main}>
