@@ -2,12 +2,13 @@ import { AppBar, IconButton, Link, Toolbar, Typography } from '@material-ui/core
 import Brightness7Icon from '@material-ui/icons/Brightness7';
 import React, { useContext } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import { AppContext } from '../../app';
+import { AppContext, NameContext } from '../../app';
 import { useStyles } from './AppHeader.styles';
 
 export default function AppHeader() {
   const classes = useStyles();
   const { switchTheme } = useContext(AppContext);
+  const { username } = useContext(NameContext);
 
   return (
     <div className={classes.main}>
@@ -18,6 +19,7 @@ export default function AppHeader() {
               project wag
             </Link>
           </Typography>
+          <Typography>{username}</Typography>
           <IconButton color='inherit' onClick={switchTheme}>
             <Brightness7Icon />
           </IconButton>

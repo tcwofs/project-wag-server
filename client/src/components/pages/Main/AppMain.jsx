@@ -2,40 +2,55 @@ import { Button, Card, CardActions, CardContent, CardMedia, Grid, LinearProgress
 import axios from 'axios';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+import io from 'socket.io-client';
 import { useStyles } from './AppMain.styles';
+
+let socket;
 
 export default () => {
   const classes = useStyles();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const ENDPOINT = 'http://localhost:3000/';
+
+  const getServices = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/services');
+      setServices(res.data);
+      setLoading(false);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
   useEffect(() => {
-    const getServices = async () => {
-      try {
-        const res = await axios.get('http://localhost:5000/api/services');
-        setServices(res.data);
-        setLoading(false);
-      } catch (err) {
-        setError(err.message);
-      }
-    };
     getServices();
   }, []);
 
+  useEffect(() => {
+    socket = io(ENDPOINT);
+
+    return () => {
+      socket.emit('disconnect');
+
+      socket.off();
+    };
+  }, [ENDPOINT]);
+
   const renderCollection = useCallback(
     () =>
-      services.map(collection => (
-        <Grid item md={6} xs={12} key={collection.id}>
+      services.map(service => (
+        <Grid item md={6} xs={12} key={service.id}>
           <Card className={classes.card}>
-            <CardMedia className={classes.cardMedia} image={collection.img} title='Contemplative Reptile' />
+            <CardMedia className={classes.cardMedia} image={service.img} title='Contemplative Reptile' />
             <CardContent>
               <Typography gutterBottom variant='h5' component='h2'>
-                {collection.name}
+                {service.name}
               </Typography>
             </CardContent>
             <CardActions>
-              <Button component={RouterLink} to={collection.path} size='small' variant='outlined' color='secondary'>
+              <Button component={RouterLink} to={{ pathname: '/room', state: { service } }} size='small' variant='outlined' color='secondary'>
                 start
               </Button>
             </CardActions>

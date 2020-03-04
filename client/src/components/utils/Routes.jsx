@@ -2,7 +2,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import { AppHeader } from '../layout';
-import { AppMain, ChatView, DurakView, RPSView, TTTView } from '../pages';
+import { AppMain, ChatView, DurakView, RoomView, RPSView, TTTView } from '../pages';
 
 const useStyles = makeStyles(theme => ({
   appContent: {
@@ -20,24 +20,13 @@ export default () => {
       <Router>
         <AppHeader />
         <Switch>
-          <Route path='/' exact>
-            <AppMain />
-          </Route>
-          <Route path='/chat'>
-            <ChatView />
-          </Route>
-          <Route path='/durak'>
-            <DurakView />
-          </Route>
-          <Route path='/rps'>
-            <RPSView />
-          </Route>
-          <Route path='/ttt'>
-            <TTTView />
-          </Route>
-          <Route>
-            <AppMain />
-          </Route>
+          <Route path='/' component={AppMain} exact />
+          <Route path='/room' component={RoomView} exact />
+          <Route path='/chat' component={ChatView} exact />
+          <Route path='/durak' component={DurakView} exact />
+          <Route path='/rps' component={RPSView} exact />
+          <Route path='/ttt' component={TTTView} exact />
+          <Route component={AppMain} />
         </Switch>
       </Router>
     </div>

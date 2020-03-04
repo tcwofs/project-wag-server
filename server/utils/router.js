@@ -1,7 +1,7 @@
 'use strict';
 const express = require('express');
 const router = express.Router();
-const services = require('./services.json');
+const services = require('../services.json');
 // const path = require('path');
 
 router.get('/', (req, res) => {
@@ -15,6 +15,10 @@ router.get('/', (req, res) => {
 
 router.get('/api/services', (req, res) => {
   res.json(services);
+});
+
+router.get('*', function(req, res) {
+  res.status(404).send('Error 404 - Page not found');
 });
 
 module.exports = router;

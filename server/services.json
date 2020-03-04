@@ -4,27 +4,35 @@
     "img": "https://img.mobiscroll.com/demos/gridlayout/toucan.jpg",
     "name": "chat",
     "overview": "A chat",
-    "path": "/chat"
+    "path": "/chat",
+    "type": "chat",
+    "rules": "a"
   },
   {
     "id": 2,
     "img": "https://img.mobiscroll.com/demos/gridlayout/kingfisher.jpg",
-    "name": "rps",
+    "name": "rock-paper-scissors",
     "overview": "A rps game",
-    "path": "/rps"
+    "path": "/rps",
+    "type": "rps",
+    "rules": "a"
   },
   {
     "id": 3,
     "img": "https://img.mobiscroll.com/demos/gridlayout/swift.jpg",
     "name": "durak",
     "overview": "A durak game",
-    "path": "/durak"
+    "path": "/durak",
+    "type": "durak",
+    "rules": "a"
   },
   {
     "id": 4,
     "img": "https://img.mobiscroll.com/demos/gridlayout/humming.jpg",
     "name": "tic-tac-toe",
     "overview": "A tic-tac-toe game",
-    "path": "/ttt"
+    "path": "/ttt",
+    "type": "ttt",
+    "rules": "a"
   }
 ]
