@@ -6,22 +6,23 @@ import { useStyles } from './ChatView.style';
 let socket;
 
 export default props => {
+  if (!props.location.state) {
+    window.location.href = `http://${window.location.host}/`;
+  }
   const classes = useStyles();
-  const { username, room } = props.location.state;
+  const { username, roomname } = props.location.state;
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
-  const ENDPOINT = 'http://localhost:3000/chat';
+  const ENDPOINT = 'http://' + window.location.host + '/chat';
 
   useEffect(() => {
     socket = io(ENDPOINT);
 
-    socket.emit('join', { username, room });
-
     return () => {
-      socket.disconnect();
+      socket.emit('disconnect');
       socket.off();
     };
-  }, [ENDPOINT, username, room]);
+  }, [ENDPOINT, username]);
 
   useEffect(() => {
     socket.on('message', recievedMessage => {
@@ -29,17 +30,17 @@ export default props => {
     });
   }, [messages]);
 
-  const sendMessage = event => {
-    event.preventDefault();
-
-    if (message) {
-      socket.emit('sendMessage', message, () => setMessage(''));
-    }
+  const sendMessage = () => {
+    socket.emit('get-users', { roomname });
+    // if (message) {
+    //   socket.emit('sendMessage', message, () => setMessage(''));
+    // }
   };
 
   return (
     <div className={classes.main}>
       <Paper className={classes.paper}>
+        <p>{roomname}</p>
         <div id='message-container'></div>
         <div className={classes.form}>
           <TextField
@@ -48,7 +49,6 @@ export default props => {
             placeholder='Placeholder'
             value={message}
             onChange={event => setMessage(event.target.value)}
-            onKeyPress={event => (event.key === 'Enter' ? sendMessage(event) : null)}
           />
           <Button variant='contained' color='primary' onClick={event => sendMessage(event)}>
             Send

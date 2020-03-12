@@ -3,10 +3,10 @@
     "id": 1,
     "img": "https://img.mobiscroll.com/demos/gridlayout/toucan.jpg",
     "name": "chat",
-    "overview": "A chat",
+    "overview": "A simple chat",
     "path": "/chat",
     "type": "chat",
-    "rules": "a"
+    "rules": "Small chat application rules are not provided. WIP"
   },
   {
     "id": 2,

@@ -2,18 +2,22 @@
 const express = require('express');
 const router = express.Router();
 const services = require('../services.json');
-// const path = require('path');
+const path = require('path');
+const cors = require('cors');
 
-router.get('/', (req, res) => {
-  res.send('server is up and running!');
-});
-
-// router.use(express.static(path.join(__dirname, '../build')));
-// router.get('/*', function(req, res) {
-//   res.sendFile(path.join(__dirname, 'build', 'index.html'));
+// router.get('/', (req, res) => {
+//   res.send('server is up and running!');
 // });
 
-router.get('/api/services', (req, res) => {
+router.all('*', cors());
+
+router.use(express.static(path.join(__dirname, '../../client/build')));
+router.get('/', function(req, res) {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+
+router.use(express.static(path.join(__dirname, '../')));
+router.get('/api/services', cors(), (req, res) => {
   res.json(services);
 });
 

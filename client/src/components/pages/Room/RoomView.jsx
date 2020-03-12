@@ -1,6 +1,9 @@
 import { Button, Divider, Paper, TextField, Typography } from '@material-ui/core';
 import React, { useContext, useEffect, useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import {
+  // Link as RouterLink,
+  Redirect,
+} from 'react-router-dom';
 import io from 'socket.io-client';
 import { NameContext } from '../../../app';
 import { useStyles } from './RoomView.styles';
@@ -8,26 +11,64 @@ import { useStyles } from './RoomView.styles';
 let socket;
 
 export default props => {
+  if (!props.location.state) {
+    window.location.href = `http://${window.location.host}/`;
+  }
   const classes = useStyles();
-  const [room, setRoom] = useState('');
+  const [roomname, setRoomname] = useState('');
+  const [rooms, setRooms] = useState([]);
+  const [clicked, setClicked] = useState(false);
   const { username } = useContext(NameContext);
   const { service } = props.location.state;
-  const ENDPOINT = 'http://localhost:3000/rooms';
+  const ENDPOINT = `http://${window.location.host}/rooms`;
 
   useEffect(() => {
     socket = io(ENDPOINT);
 
-    socket.emit('get-active-rooms', { type: service.type });
-
     return () => {
-      socket.disconnect();
+      socket.emit('disconnect');
       socket.off();
     };
-  }, [ENDPOINT, service]);
+  }, [ENDPOINT]);
+
+  useEffect(() => {
+    socket.emit('get-active-rooms', { type: service.type });
+  }, [service]);
+
+  useEffect(() => {
+    socket.on('get-active-rooms', recievedRooms => {
+      setRooms(recievedRooms);
+    });
+  }, [rooms]);
+
+  useEffect(() => {
+    socket.on('error-redirect', message => {
+      window.alert(message.error);
+      window.location.href = `http://${window.location.host}/`;
+    });
+    socket.on('error-msg', message => {
+      window.alert(message.error);
+    });
+  }, []);
+
+  const connectToNewRoom = () => {
+    socket.emit('connect-new-room', { roomname, type: service.type });
+    socket.on('room created', () => {
+      setClicked(true);
+    });
+  };
+
+  const connectToExistingRoom = selectedRoom => {
+    socket.emit('connect-exist-room', { roomname: selectedRoom, type: service.type });
+    socket.on('room created', () => {
+      setClicked(true);
+    });
+  };
 
   return (
     <div className={classes.main}>
       <Paper className={classes.paper}>
+        {clicked ? <Redirect push to={{ pathname: service.path, state: { username, roomname } }} /> : null}
         <Typography variant='h4'>{service.name}</Typography>
         <Divider />
         <div className={classes.roomInfo}>
@@ -41,26 +82,30 @@ export default props => {
         </div>
         <div className={classes.roomPanel}>
           <Typography variant='h6'>Create new room</Typography>
-          <form className={classes.createRoom} noValidate autoComplete='off'>
-            <TextField
-              className={classes.createRoomInput}
-              onChange={event => setRoom(event.target.value)}
-              label='new room name'
-              onKeyPress={event => (event.key === 'Enter' ? event.preventDefault() : null)}
-            />
-            <Button
-              component={RouterLink}
-              to={{ pathname: service.path, state: { username, room } }}
-              className={classes.createRoomButton}
-              variant='outlined'
-              color='primary'
-            >
+          <div className={classes.createRoom}>
+            <TextField className={classes.createRoomInput} onChange={event => setRoomname(event.target.value)} label='new room name' />
+            <Button className={classes.createRoomButton} variant='outlined' color='primary' onClick={connectToNewRoom}>
               Create
             </Button>
-          </form>
+          </div>
           <Typography variant='h6' gutterBottom>
             Connect to a existing one
           </Typography>
+          {rooms.map(room => (
+            <div key={room.id}>
+              <p>{room.roomname}</p>
+              <Button
+                variant='outlined'
+                color='primary'
+                onClick={() => {
+                  setRoomname(room.roomname);
+                  connectToExistingRoom(room.roomname);
+                }}
+              >
+                connect
+              </Button>
+            </div>
+          ))}
         </div>
       </Paper>
     </div>

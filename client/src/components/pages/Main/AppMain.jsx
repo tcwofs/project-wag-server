@@ -2,21 +2,25 @@ import { Button, Card, CardActions, CardContent, CardMedia, Grid, LinearProgress
 import axios from 'axios';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
-import io from 'socket.io-client';
 import { useStyles } from './AppMain.styles';
 
-let socket;
+export let url;
+
+if (process.env.NODE_ENV !== 'production') {
+  url = `http://${process.env.REACT_APP_URL_DEV}/api/services`;
+} else {
+  url = `http://${window.location.host}/api/services`;
+}
 
 export default () => {
   const classes = useStyles();
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const ENDPOINT = 'http://localhost:3000/';
 
   const getServices = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/services');
+      const res = await axios.get(url);
       setServices(res.data);
       setLoading(false);
     } catch (err) {
@@ -27,16 +31,6 @@ export default () => {
   useEffect(() => {
     getServices();
   }, []);
-
-  useEffect(() => {
-    socket = io(ENDPOINT);
-
-    return () => {
-      socket.emit('disconnect');
-
-      socket.off();
-    };
-  }, [ENDPOINT]);
 
   const renderCollection = useCallback(
     () =>
