@@ -1,5 +1,5 @@
-import { Button, Divider, Paper, TextField, Typography } from '@material-ui/core';
-import React, { useContext, useEffect, useState } from 'react';
+import { Button, Divider, Grid, Paper, TextField, Typography } from '@material-ui/core';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import {
   // Link as RouterLink,
   Redirect,
@@ -21,6 +21,7 @@ export default props => {
   const { username } = useContext(NameContext);
   const { service } = props.location.state;
   const ENDPOINT = `http://${window.location.host}/rooms`;
+  let getRoomInterval = useRef();
 
   useEffect(() => {
     socket = io(ENDPOINT);
@@ -32,14 +33,16 @@ export default props => {
   }, [ENDPOINT]);
 
   useEffect(() => {
-    socket.emit('get-active-rooms', { type: service.type });
+    getRoomInterval.current = setInterval(() => {
+      socket.emit('get-active-rooms', { type: service.type });
+    }, 2000);
   }, [service]);
 
   useEffect(() => {
     socket.on('get-active-rooms', recievedRooms => {
       setRooms(recievedRooms);
     });
-  }, [rooms]);
+  });
 
   useEffect(() => {
     socket.on('error-redirect', message => {
@@ -52,15 +55,19 @@ export default props => {
   }, []);
 
   const connectToNewRoom = () => {
-    socket.emit('connect-new-room', { roomname, type: service.type });
-    socket.on('room created', () => {
-      setClicked(true);
-    });
+    if (roomname) {
+      socket.emit('connect-new-room', { roomname, type: service.type });
+      socket.on('room created', () => {
+        clearInterval(getRoomInterval.current);
+        setClicked(true);
+      });
+    }
   };
 
   const connectToExistingRoom = selectedRoom => {
     socket.emit('connect-exist-room', { roomname: selectedRoom, type: service.type });
     socket.on('room created', () => {
+      clearInterval(getRoomInterval.current);
       setClicked(true);
     });
   };
@@ -69,44 +76,59 @@ export default props => {
     <div className={classes.main}>
       <Paper className={classes.paper}>
         {clicked ? <Redirect push to={{ pathname: service.path, state: { username, roomname } }} /> : null}
-        <Typography variant='h4'>{service.name}</Typography>
-        <Divider />
-        <div className={classes.roomInfo}>
-          <Typography variant='h6' gutterBottom>
-            {service.overview}
-          </Typography>
-          <Divider light />
-          <Typography variant='subtitle1' gutterBottom>
-            {service.rules}
-          </Typography>
-        </div>
-        <div className={classes.roomPanel}>
-          <Typography variant='h6'>Create new room</Typography>
-          <div className={classes.createRoom}>
-            <TextField className={classes.createRoomInput} onChange={event => setRoomname(event.target.value)} label='new room name' />
-            <Button className={classes.createRoomButton} variant='outlined' color='primary' onClick={connectToNewRoom}>
-              Create
-            </Button>
-          </div>
-          <Typography variant='h6' gutterBottom>
-            Connect to a existing one
-          </Typography>
-          {rooms.map(room => (
-            <div key={room.id}>
-              <p>{room.roomname}</p>
-              <Button
-                variant='outlined'
-                color='primary'
-                onClick={() => {
-                  setRoomname(room.roomname);
-                  connectToExistingRoom(room.roomname);
-                }}
-              >
-                connect
-              </Button>
+
+        <Grid className={classes.grid} container spacing={2}>
+          <Grid item md={8} xs={12}>
+            <Typography variant='h4'>{service.name}</Typography>
+            <Divider />
+            <div className={classes.roomInfo}>
+              <Typography variant='h6' gutterBottom>
+                {service.overview}
+              </Typography>
+              <Divider light />
+              <Typography variant='subtitle1' gutterBottom>
+                {service.rules}
+              </Typography>
             </div>
-          ))}
-        </div>
+          </Grid>
+
+          <Grid item md={4} xs={12}>
+            <div className={classes.roomPanel}>
+              <Typography variant='h6'>Create new room</Typography>
+              <div className={classes.createRoom}>
+                <TextField
+                  className={classes.createRoomInput}
+                  onChange={event => setRoomname(event.target.value.trim().toLowerCase())}
+                  label='new room name'
+                />
+                <Button className={classes.createRoomButton} variant='outlined' color='primary' onClick={connectToNewRoom}>
+                  Create
+                </Button>
+              </div>
+              <Typography variant='h6' gutterBottom>
+                Connect to a existing one
+              </Typography>
+              {rooms.map(room => (
+                <div key={room.id}>
+                  <p>
+                    {room.roomname}
+                    {service.maxUsers ? ` (${room.users.length} / ${service.maxUsers})` : null}
+                  </p>
+                  <Button
+                    variant='outlined'
+                    color='primary'
+                    onClick={() => {
+                      setRoomname(room.roomname.trim().toLowerCase());
+                      connectToExistingRoom(room.roomname.trim().toLowerCase());
+                    }}
+                  >
+                    connect
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </Grid>
+        </Grid>
       </Paper>
     </div>
   );

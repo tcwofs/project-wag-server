@@ -12,22 +12,23 @@ export const useStyles = makeStyles(theme => ({
   },
   paper: {
     padding: '20px',
+    width: '100%',
     maxWidth: '80vw',
-    width: '60vw',
+    marginRight: '1rem',
+    marginLeft: '1rem',
     backgroundColor: theme.palette.background.fiveperc,
-    margin: 'auto',
-    textAlign: 'justify',
   },
+  grid: {},
   roomInfo: {
     float: 'left',
     paddingTop: '1vh',
-    width: '60%',
+    width: '100%',
     height: '100%',
   },
   roomPanel: {
     float: 'right',
     paddingTop: '1vh',
-    width: 'auto',
+    width: '100%',
     height: '100%',
     '& > form': {
       paddingBottom: '1vh',
@@ -42,5 +43,6 @@ export const useStyles = makeStyles(theme => ({
   createRoomButton: {
     width: '100%',
     marginTop: '1vh',
+    marginBottom: '1vh',
   },
 }));

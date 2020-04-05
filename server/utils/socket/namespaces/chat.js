@@ -1,5 +1,5 @@
-const { getUser } = require('../../users');
-const { addRoom, getRooms, getRoom, addUserToRoom, removeUserFromRoom } = require('../../rooms');
+const { getUser } = require('../users');
+const { addRoom, getRooms, getRoom, addUserToRoom, removeUserFromRoom } = require('../rooms');
 
 const getActiveUsersInRoom = ({ roomname }) => {
   const { room } = getRoom({ roomname, type: 'chat' });

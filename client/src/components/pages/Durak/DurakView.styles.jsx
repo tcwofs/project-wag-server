@@ -9,6 +9,8 @@ export const useStyles = makeStyles(theme => ({
     justifyContent: 'center',
     paddingTop: '1vh',
     paddingBottom: '1vh',
+
+    flexGrow: 1,
   },
   paper: {
     padding: '20px',
@@ -23,18 +25,12 @@ export const useStyles = makeStyles(theme => ({
     justifyContent: 'center',
     padding: 0,
   },
-  card: {
-    backgroundColor: theme.palette.background.eightperc,
-    color: theme.palette.text.primary,
-    width: 'auto',
-  },
-  cardMedia: {
-    height: '15vh',
-    filter: 'blur(10px)',
-  },
-  errorLabel: {
+  papers: {
+    padding: theme.spacing(2),
     textAlign: 'center',
-    marginBottom: '0.5vh',
-    color: theme.palette.text.error,
+    color: theme.palette.text.secondary,
+  },
+  gamefield: {
+    marginTop: '0.7rem',
   },
 }));

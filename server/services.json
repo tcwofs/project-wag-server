@@ -15,7 +15,9 @@
     "overview": "A rps game",
     "path": "/rps",
     "type": "rps",
-    "rules": "a"
+    "rules": "a",
+
+    "maxUsers": 2
   },
   {
     "id": 3,
@@ -24,7 +26,8 @@
     "overview": "A durak game",
     "path": "/durak",
     "type": "durak",
-    "rules": "a"
+    "rules": "a",
+    "maxUsers": 4
   },
   {
     "id": 4,
@@ -33,6 +36,7 @@
     "overview": "A tic-tac-toe game",
     "path": "/ttt",
     "type": "ttt",
-    "rules": "a"
+    "rules": "a",
+    "maxUsers": 2
   }
 ]

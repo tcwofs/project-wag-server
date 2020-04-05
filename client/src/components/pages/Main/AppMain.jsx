@@ -1,4 +1,4 @@
-import { Button, Card, CardActions, CardContent, CardMedia, Grid, LinearProgress, Paper, Typography } from '@material-ui/core';
+import { Button, Card, CardActions, CardContent, Grid, LinearProgress, Paper, Typography } from '@material-ui/core';
 import axios from 'axios';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
@@ -6,11 +6,7 @@ import { useStyles } from './AppMain.styles';
 
 export let url;
 
-if (process.env.NODE_ENV !== 'production') {
-  url = `http://${process.env.REACT_APP_URL_DEV}/api/services`;
-} else {
-  url = `http://${window.location.host}/api/services`;
-}
+url = `http://${window.location.host}/api/services`;
 
 export default () => {
   const classes = useStyles();
@@ -37,7 +33,6 @@ export default () => {
       services.map(service => (
         <Grid item md={6} xs={12} key={service.id}>
           <Card className={classes.card}>
-            <CardMedia className={classes.cardMedia} image={service.img} title='Contemplative Reptile' />
             <CardContent>
               <Typography gutterBottom variant='h5' component='h2'>
                 {service.name}
@@ -51,7 +46,7 @@ export default () => {
           </Card>
         </Grid>
       )),
-    [services, classes.card, classes.cardMedia]
+    [services, classes.card]
   );
 
   return (

@@ -1,5 +1,5 @@
-const { getUser } = require('../../users');
-const { addRoom, getRooms, addUserToRoom, removeUserFromRoom, removeRoom } = require('../../rooms');
+const { getUser } = require('../users');
+const { addRoom, getRooms, addUserToRoom, removeUserFromRoom, removeRoom } = require('../rooms');
 
 module.exports = io => {
   const rooms = io.of('/rooms');
@@ -15,7 +15,6 @@ module.exports = io => {
 
     socket.on('get-active-rooms', ({ type }) => {
       const rooms = getRooms(type);
-      console.log(rooms);
       if (rooms) {
         socket.emit('get-active-rooms', rooms);
       }
@@ -26,8 +25,8 @@ module.exports = io => {
       if (user) {
         const { error, room } = addRoom({ roomname, type, user });
         if (room) {
-          socket.join(room.id);
           socket.emit('room created');
+          return;
         }
         socket.emit('error-msg', { error });
         return;
@@ -40,8 +39,8 @@ module.exports = io => {
       if (user) {
         const { error, room } = addUserToRoom({ roomname, type, user });
         if (room) {
-          socket.join(room.id + room.roomname);
           socket.emit('room created');
+          return;
         }
         socket.emit('error-msg', { error });
         return;
@@ -50,13 +49,6 @@ module.exports = io => {
     });
 
     socket.on('disconnect', () => {
-      const { error, room } = removeUserFromRoom({ id: socket.conn.id });
-      if (!error) {
-        socket.leave(room.id + room.roomname);
-        if (room.users.length === 0) {
-          removeRoom(room.id);
-        }
-      }
       console.log(`User ${socket.conn.id} left '/rooms'!`);
     });
   });

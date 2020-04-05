@@ -1,4 +1,4 @@
-const { addUser, removeUser } = require('../users');
+const { addUser, removeUser } = require('./users');
 
 const socketio = require('socket.io');
 
