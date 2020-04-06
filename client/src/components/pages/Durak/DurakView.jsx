@@ -188,17 +188,32 @@ export default props => {
                     <div>
                       <Typography>{cardcount}</Typography>
                       {userstatus === 'other' || !userstatus ? (
-                        <></>
-                      ) : (
-                        <Button variant='contained' color='secondary' onClick={finishMove}>
-                          {userstatus === 'attacking_1' || userstatus === 'attacking_2' ? (
+                        <Typography>Please wait for you turn</Typography>
+                      ) : userstatus === 'attacking_1' ? (
+                        <div>
+                          <Typography>You are attacking 1st</Typography>
+                          <Button variant='contained' color='secondary' onClick={finishMove}>
                             <Typography>Finish</Typography>
-                          ) : field.filter(row => row.length % 2 === 0).length === field.length ? (
-                            <Typography>Draft</Typography>
-                          ) : (
-                            <Typography>Take</Typography>
-                          )}
-                        </Button>
+                          </Button>
+                        </div>
+                      ) : userstatus === 'attacking_2' ? (
+                        <div>
+                          <Typography>You are attacking 2nd</Typography>
+                          <Button variant='contained' color='secondary' onClick={finishMove}>
+                            <Typography>Finish</Typography>
+                          </Button>
+                        </div>
+                      ) : (
+                        <div>
+                          <Typography>You are defending</Typography>
+                          <Button variant='contained' color='secondary' onClick={finishMove}>
+                            {field.filter(row => row.length % 2 === 0).length === field.length ? (
+                              <Typography>Draft</Typography>
+                            ) : (
+                              <Typography>Take</Typography>
+                            )}
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </Grid>

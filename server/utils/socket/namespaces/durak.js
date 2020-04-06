@@ -35,7 +35,6 @@ module.exports = io => {
           status: user.status,
         });
       });
-      // console.log(room);
     };
 
     const allowStartGame = room => {
@@ -64,7 +63,7 @@ module.exports = io => {
       const { room } = getRoom({ roomname, type: 'durak' });
       const index = room.users.findIndex(user => user.id === socket.conn.id);
       if (index !== -1) {
-        room.users[index].ready = true;
+        room.users[index].ready = !room.users[index].ready;
         allowStartGame(room);
         return;
       }
@@ -111,22 +110,19 @@ module.exports = io => {
           if (!!room.deck.field.length) {
             for (let i = 0; i < room.deck.field.length; i++) {
               if (room.deck.field[i].length === 1) {
-                let cardNum = card.match(/[0-9]+/g);
-                let fieldNum = room.deck.field[i][0].match(/[0-9]+/g);
-                let cardChar = card.match(/[SHDC]/g);
-                let fieldChar = room.deck.field[i][0].match(/[SHDC]/g);
-
-                if (cardChar.source === fieldChar.source) {
-                  console.log('xd1');
-                  if (parseInt(cardNum) > parseInt(fieldNum)) {
-                    console.log('xd2');
+                let cardNum = parseInt(card.match(/[0-9]+/g));
+                let fieldNum = parseInt(room.deck.field[i][0].match(/[0-9]+/g));
+                let cardChar = card.match(/[SHDC]/g).toString();
+                let fieldChar = room.deck.field[i][0].match(/[SHDC]/g).toString();
+                if (cardChar === fieldChar) {
+                  if (cardNum > fieldNum) {
                     room.deck.field[i].push(card);
                     const newhand = room.users[userindex].hand.splice(cardindex, 1)[0];
                     updatedField(room);
                     break;
                   }
                 }
-                if (cardChar[0] === room.deck.lastcard[0].match(/[SHDC]/g)[0]) {
+                if (cardChar === room.deck.lastcard[0].match(/[SHDC]/g).toString()) {
                   room.deck.field[i].push(card);
                   const newhand = room.users[userindex].hand.splice(cardindex, 1)[0];
                   updatedField(room);

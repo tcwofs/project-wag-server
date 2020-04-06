@@ -65,17 +65,53 @@ const shuffleDeck = array => {
 
 const createDeck = recievedUsers => {
   const localcards = shuffleDeck([...cards]);
-  let deck = { id: ++deckIndex, field: [], draft: [], cards: localcards, lastcard: localcards.slice(-1) };
+  const lastcard = localcards.slice(-1);
+  let deck = { id: ++deckIndex, field: [], draft: [], cards: localcards, lastcard };
   let users = [];
   for (let i = 0; i < recievedUsers.length; i++) {
     hand = deck.cards.splice(0, 6);
-    const user = { id: recievedUsers[i].id, username: recievedUsers[i].username, hand, length: hand.length, status: 'other' };
+    let lowest = 99;
+
+    hand.map(card => {
+      cardChar = card.match(/[SHDC]/g).toString();
+      cardNum = parseInt(card.match(/[0-9]+/g));
+      lastcardChar = lastcard[0].match(/[SHDCU]/g).toString();
+      if (cardChar === lastcardChar) {
+        if (cardNum < lowest) {
+          lowest = cardNum;
+        }
+      }
+    });
+
+    const user = { id: recievedUsers[i].id, username: recievedUsers[i].username, hand, length: hand.length, status: 'other', lowest };
     users.push(user);
   }
-  //TODO: find user index with lowest card and set attacking_1 to it
-  users[0].status = 'attacking_1';
-  if (users.length > 2) users[2].status = 'attacking_2';
-  users[1].status = 'defending';
+
+  let first = 0;
+  let lowest = users[first].lowest;
+
+  for (let j = 1; j < users.length; j++) {
+    if (users[j].lowest < lowest) {
+      first = j;
+      lowest = users[j].lowest;
+    }
+  }
+
+  users[first].status = 'attacking_1';
+
+  if (first + 2 < users.length) {
+    users[first + 1].status = 'defending';
+    if (users.length > 2) users[first + 2].status = 'attacking_2';
+  } else if (first + 1 < users.length) {
+    users[first + 1].status = 'defending';
+    first = 0;
+    if (users.length > 2) users[first].status = 'attacking_2';
+  } else {
+    first = 0;
+    users[first].status = 'defending';
+    if (users.length > 2) users[first + 1].status = 'attacking_2';
+  }
+
   return { deck, users };
 };
 

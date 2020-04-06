@@ -16,7 +16,7 @@ export default props => {
   }
   const classes = useStyles();
   const [roomname, setRoomname] = useState('');
-  const [rooms, setRooms] = useState([]);
+  const [rooms, setRooms] = useState();
   const [clicked, setClicked] = useState(false);
   const { username } = useContext(NameContext);
   const { service } = props.location.state;
@@ -108,24 +108,25 @@ export default props => {
               <Typography variant='h6' gutterBottom>
                 Connect to a existing one
               </Typography>
-              {rooms.map(room => (
-                <div key={room.id}>
-                  <p>
-                    {room.roomname}
-                    {service.maxUsers ? ` (${room.users.length} / ${service.maxUsers})` : null}
-                  </p>
-                  <Button
-                    variant='outlined'
-                    color='primary'
-                    onClick={() => {
-                      setRoomname(room.roomname.trim().toLowerCase());
-                      connectToExistingRoom(room.roomname.trim().toLowerCase());
-                    }}
-                  >
-                    connect
-                  </Button>
-                </div>
-              ))}
+              {rooms &&
+                rooms.map(room => (
+                  <div key={room.id}>
+                    <p>
+                      {room.roomname}
+                      {service.maxUsers ? ` (${room.users.length} / ${service.maxUsers})` : null}
+                    </p>
+                    <Button
+                      variant='outlined'
+                      color='primary'
+                      onClick={() => {
+                        setRoomname(room.roomname.trim().toLowerCase());
+                        connectToExistingRoom(room.roomname.trim().toLowerCase());
+                      }}
+                    >
+                      connect
+                    </Button>
+                  </div>
+                ))}
             </div>
           </Grid>
         </Grid>
