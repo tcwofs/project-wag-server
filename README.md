@@ -4,22 +4,6 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 ## Available Scripts
 
-### `npm run npmClientInstall`
-
-Install all cient pakages using npm.
-
-### `npm run npmServerInstall`
-
-Install all server pakages using npm.
-
-### `npm run yarnClientInstall`
-
-Install all cient pakages using yarn.
-
-### `npm run yarnServerInstall`
-
-Install all server pakages using yarn.
-
 ### `npm run client`
 
 Runs client app in the development mode.<br />

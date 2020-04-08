@@ -64,7 +64,7 @@ const shuffleDeck = array => {
 };
 
 const createDeck = recievedUsers => {
-  const localcards = shuffleDeck([...cards]);
+  const localcards = shuffleDeck(shuffleDeck([...cards]));
   const lastcard = localcards.slice(-1);
   let deck = { id: ++deckIndex, field: [], draft: [], cards: localcards, lastcard };
   let users = [];
@@ -83,7 +83,15 @@ const createDeck = recievedUsers => {
       }
     });
 
-    const user = { id: recievedUsers[i].id, username: recievedUsers[i].username, hand, length: hand.length, status: 'other', lowest };
+    const user = {
+      id: recievedUsers[i].id,
+      username: recievedUsers[i].username,
+      hand,
+      length: hand.length,
+      status: 'other',
+      lowest,
+      finished: false,
+    };
     users.push(user);
   }
 
@@ -97,22 +105,32 @@ const createDeck = recievedUsers => {
     }
   }
 
-  users[first].status = 'attacking_1';
-
-  if (first + 2 < users.length) {
-    users[first + 1].status = 'defending';
-    if (users.length > 2) users[first + 2].status = 'attacking_2';
-  } else if (first + 1 < users.length) {
-    users[first + 1].status = 'defending';
-    first = 0;
-    if (users.length > 2) users[first].status = 'attacking_2';
-  } else {
-    first = 0;
-    users[first].status = 'defending';
-    if (users.length > 2) users[first + 1].status = 'attacking_2';
-  }
+  users = giveStatus(users, first);
 
   return { deck, users };
 };
 
-module.exports = { createDeck };
+const giveStatus = (users, first) => {
+  if (first === users.length) {
+    first = 0;
+  }
+
+  users[first].status = 'attacking_1';
+
+  if (first + 2 < users.length) {
+    users[first + 1].status = 'defending';
+    if (users.length > 2 && users[first + 2].hand.length !== 0) users[first + 2].status = 'attacking_2';
+  } else if (first + 1 < users.length) {
+    users[first + 1].status = 'defending';
+    first = 0;
+    if (users.length > 2 && users[first].hand.length !== 0) users[first].status = 'attacking_2';
+  } else {
+    first = 0;
+    users[first].status = 'defending';
+    if (users.length > 2 && users[first + 1].hand.length !== 0) users[first + 1].status = 'attacking_2';
+  }
+
+  return users;
+};
+
+module.exports = { createDeck, giveStatus };

@@ -7,7 +7,7 @@ let socket;
 
 export default props => {
   const classes = useStyles();
-  const [finished, setFinished] = useState(null);
+  const [finishgame, setFinishgame] = useState(null);
   const [lobby, setLobby] = useState(true);
   const [users, setUsers] = useState([]);
   const [userhand, setUserhand] = useState([]);
@@ -16,6 +16,7 @@ export default props => {
   const [cardcount, setCardcount] = useState();
   const [userstatus, setUserStatus] = useState('other');
   const [field, setField] = useState();
+  const [userfinished, setUserfinished] = useState(false);
 
   if (!props.location.state) {
     window.location.href = `http://${window.location.host}/`;
@@ -52,13 +53,14 @@ export default props => {
       setLobby(false);
     });
 
-    socket.on('handcards', ({ recievedUserhand, allcards, userhands, status }) => {
+    socket.on('handcards', ({ recievedUserhand, allcards, userhands, status, finished }) => {
       setUserhand(recievedUserhand);
       setLastcard(allcards.lastcard);
       setCardcount(allcards.cardcount);
       setField(allcards.field);
       setOtherusers(userhands);
       setUserStatus(status);
+      setUserfinished(finished);
     });
 
     socket.on('update-field', ({ updatedField, updatedUserhand }) => {
@@ -67,7 +69,7 @@ export default props => {
     });
 
     socket.on('finish-game', ({ lostuser }) => {
-      setFinished(lostuser.username);
+      setFinishgame(lostuser.username);
     });
   });
 
@@ -84,7 +86,8 @@ export default props => {
   };
 
   const finishMove = () => {
-    socket.emit('finish-attack');
+    setUserfinished(!userfinished);
+    socket.emit('finish-attack', { roomname });
   };
 
   return (
@@ -94,9 +97,9 @@ export default props => {
           {roomname}
         </Typography>
         <Divider style={{ marginBottom: '1rem' }} light />
-        {finished !== null ? (
+        {finishgame !== null ? (
           <div>
-            <p style={{ textAlign: 'center' }}>{finished} lost! game ended</p>
+            <p style={{ textAlign: 'center' }}>{finishgame} lost! game ended</p>
             <Button variant='contained' color='secondary' href={`http://${window.location.host}/`}>
               Go Home
             </Button>
@@ -193,14 +196,14 @@ export default props => {
                         <div>
                           <Typography>You are attacking 1st</Typography>
                           <Button variant='contained' color='secondary' onClick={finishMove}>
-                            <Typography>Finish</Typography>
+                            {!userfinished ? <Typography>Finish</Typography> : <Typography>Cancel</Typography>}
                           </Button>
                         </div>
                       ) : userstatus === 'attacking_2' ? (
                         <div>
                           <Typography>You are attacking 2nd</Typography>
                           <Button variant='contained' color='secondary' onClick={finishMove}>
-                            <Typography>Finish</Typography>
+                            {!userfinished ? <Typography>Finish</Typography> : <Typography>Cancel</Typography>}
                           </Button>
                         </div>
                       ) : (
@@ -208,9 +211,15 @@ export default props => {
                           <Typography>You are defending</Typography>
                           <Button variant='contained' color='secondary' onClick={finishMove}>
                             {field.filter(row => row.length % 2 === 0).length === field.length ? (
-                              <Typography>Draft</Typography>
-                            ) : (
+                              !userfinished ? (
+                                <Typography>Draft</Typography>
+                              ) : (
+                                <Typography>Cancel</Typography>
+                              )
+                            ) : !userfinished ? (
                               <Typography>Take</Typography>
+                            ) : (
+                              <Typography>Cancel</Typography>
                             )}
                           </Button>
                         </div>
@@ -221,7 +230,7 @@ export default props => {
                     <Grid container spacing={0}>
                       {userhand &&
                         userhand.map(card => (
-                          <Grid item xs={2}>
+                          <Grid item xs={2} md={1}>
                             <div>
                               <img
                                 alt=''
