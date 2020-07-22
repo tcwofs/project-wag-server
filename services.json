@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "name": "chat",
+    "overview": "A simple chat",
+    "path": "/chat",
+    "type": "chat",
+    "rules": "Small chat application rules are not provided. WIP"
+  },
+  {
+    "id": 2,
+    "name": "rock-paper-scissors",
+    "overview": "A rps game",
+    "path": "/rps",
+    "type": "rps",
+    "rules": "a",
+
+    "maxUsers": 2
+  },
+  {
+    "id": 3,
+    "name": "durak",
+    "overview": "A durak game",
+    "path": "/durak",
+    "type": "durak",
+    "rules": "a",
+    "maxUsers": 4
+  },
+  {
+    "id": 4,
+    "name": "tic-tac-toe",
+    "overview": "A tic-tac-toe game",
+    "path": "/ttt",
+    "type": "ttt",
+    "rules": "a",
+    "maxUsers": 2
+  }
+]
