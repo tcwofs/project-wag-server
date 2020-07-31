@@ -1,9 +1,9 @@
-const { getUser } = require('../users');
-const { addRoom, getRooms, addUserToRoom } = require('../rooms');
+const { getUser } = require('./users');
+const { addRoom, getRooms, addUserToRoom } = require('../../services/rooms');
 
-module.exports = io => {
+module.exports = (io) => {
   const rooms = io.of('/rooms');
-  rooms.on('connection', socket => {
+  rooms.on('connection', (socket) => {
     console.log(`User ${socket.conn.id} listenning to a '/rooms'!`);
     const user = getUser(socket.conn.id);
 

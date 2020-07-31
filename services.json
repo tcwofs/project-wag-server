@@ -1,13 +1,5 @@
 [
   {
-    "id": 1,
-    "name": "chat",
-    "overview": "A simple chat",
-    "path": "/chat",
-    "type": "chat",
-    "rules": "Small chat application rules are not provided. WIP"
-  },
-  {
     "id": 2,
     "name": "rock-paper-scissors",
     "overview": "A rps game",

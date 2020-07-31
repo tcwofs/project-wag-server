@@ -1,10 +1,10 @@
-const { getUser } = require('../users');
-const { getRoom, removeRoom, removeUserFromRoom } = require('../rooms');
+const { getUser } = require('./users');
+const { getRoom, removeRoom, removeUserFromRoom } = require('../../services/rooms');
 const { createDeck, giveStatus } = require('../../services/durak');
 
-module.exports = io => {
+module.exports = (io) => {
   const durak = io.of('/durak');
-  durak.on('connection', socket => {
+  durak.on('connection', (socket) => {
     console.log(`User ${socket.id} connected to a '/durak'!`);
 
     const user = getUser(socket.conn.id);
@@ -14,8 +14,8 @@ module.exports = io => {
       return;
     }
 
-    const allowStartGame = room => {
-      const usersReady = room.users.filter(user => user.ready === true);
+    const allowStartGame = (room) => {
+      const usersReady = room.users.filter((user) => user.ready === true);
       if (room.users.length > 1 && room.users.length === usersReady.length) {
         durak.in(`${room.id}_${room.roomname}`).emit('start-game');
         room.active = false;
@@ -23,15 +23,15 @@ module.exports = io => {
       }
     };
 
-    const startGame = room => {
+    const startGame = (room) => {
       const { deck, users } = createDeck(room.users);
       room.deck = deck;
       room.users = users;
       updateField(room);
     };
 
-    const updateField = room => {
-      room.users.map(user => {
+    const updateField = (room) => {
+      room.users.map((user) => {
         let userhands = room.users.reduce((filtered, filteruser) => {
           if (filteruser.id !== user.id) {
             let someNewValue = { id: filteruser.id, username: filteruser.username, handlength: filteruser.hand.length };
@@ -54,15 +54,15 @@ module.exports = io => {
       });
     };
 
-    const updateOrder = room => {
-      const lostuser = room.users.filter(user => user.hand.length !== 0);
+    const updateOrder = (room) => {
+      const lostuser = room.users.filter((user) => user.hand.length !== 0);
       if (room.deck.cards.length === 0 && lostuser.length === 1) {
         durak.in(`${room.id}_${room.roomname}`).emit('finish-game', { lostuser: lostuser[0] });
       }
-      const userDefenceIndex = room.users.findIndex(user => user.status === 'defending');
+      const userDefenceIndex = room.users.findIndex((user) => user.status === 'defending');
 
       let first = 0;
-      let draft = room.deck.field.filter(row => row.length % 2 === 0).length === room.deck.field.length;
+      let draft = room.deck.field.filter((row) => row.length % 2 === 0).length === room.deck.field.length;
       let fieldcards = room.deck.field.splice(0);
 
       if (draft) {
@@ -81,18 +81,18 @@ module.exports = io => {
         first = userDefenceIndex + 1;
       }
 
-      const userswithoutcards = room.users.filter(user => user.hand.length < 6);
-      userswithoutcards.map(user => {
+      const userswithoutcards = room.users.filter((user) => user.hand.length < 6);
+      userswithoutcards.map((user) => {
         user.hand = user.hand.concat(room.deck.cards.splice(0, 6 - user.hand.length));
       });
 
-      room.users.map(user => {
+      room.users.map((user) => {
         user.finished = false;
         user.status = 'other';
       });
 
       room.users = giveStatus(
-        room.users.filter(user => user.hand.length !== 0),
+        room.users.filter((user) => user.hand.length !== 0),
         first
       );
       updateField(room);
@@ -106,7 +106,7 @@ module.exports = io => {
 
     socket.on('user-ready', ({ roomname }) => {
       const { room } = getRoom({ roomname, type: 'durak' });
-      const index = room.users.findIndex(user => user.id === socket.conn.id);
+      const index = room.users.findIndex((user) => user.id === socket.conn.id);
       if (index !== -1) {
         room.users[index].ready = !room.users[index].ready;
         allowStartGame(room);
@@ -117,15 +117,15 @@ module.exports = io => {
 
     socket.on('attack', ({ card, roomname, second }) => {
       const { room } = getRoom({ roomname, type: 'durak' });
-      const userindex = room.users.findIndex(user => user.id === socket.conn.id);
+      const userindex = room.users.findIndex((user) => user.id === socket.conn.id);
       if (room.deck.field.length === 6) return;
       if (
-        room.users.filter(user => user.status === 'defending' && room.deck.field.filter(row => row.length % 2 !== 0).length === user.hand.length)
+        room.users.filter((user) => user.status === 'defending' && room.deck.field.filter((row) => row.length % 2 !== 0).length === user.hand.length)
           .length !== 0
       )
         return;
       if (userindex !== -1) {
-        const cardindex = room.users[userindex].hand.findIndex(delcard => delcard === card);
+        const cardindex = room.users[userindex].hand.findIndex((delcard) => delcard === card);
         if (cardindex !== -1) {
           let result = [];
           if (room.deck.field.length) {
@@ -145,7 +145,7 @@ module.exports = io => {
           if ((second && room.deck.field.length && result.length) || ((result.length || !room.deck.field.length) && !second)) {
             room.deck.field.push([card]);
             room.users[userindex].hand.splice(cardindex, 1)[0];
-            room.users.map(user => (user.finished = false));
+            room.users.map((user) => (user.finished = false));
             updateField(room);
           }
         }
@@ -154,9 +154,9 @@ module.exports = io => {
 
     socket.on('defence', ({ card, roomname }) => {
       const { room } = getRoom({ roomname, type: 'durak' });
-      const userindex = room.users.findIndex(user => user.id === socket.conn.id);
+      const userindex = room.users.findIndex((user) => user.id === socket.conn.id);
       if (userindex !== -1) {
-        const cardindex = room.users[userindex].hand.findIndex(delcard => delcard === card);
+        const cardindex = room.users[userindex].hand.findIndex((delcard) => delcard === card);
         if (cardindex !== -1) {
           if (room.deck.field.length) {
             for (let i = 0; i < room.deck.field.length; i++) {
@@ -165,10 +165,13 @@ module.exports = io => {
                 let fieldNum = parseInt(room.deck.field[i][0].match(/[0-9]+/g));
                 let cardChar = card.match(/[SHDC]/g).toString();
                 let fieldChar = room.deck.field[i][0].match(/[SHDC]/g).toString();
-                if ((cardChar === fieldChar && cardNum > fieldNum) || (cardChar !== fieldChar && cardChar === room.deck.lastcard[0].match(/[SHDC]/g).toString())) {
+                if (
+                  (cardChar === fieldChar && cardNum > fieldNum) ||
+                  (cardChar !== fieldChar && cardChar === room.deck.lastcard[0].match(/[SHDC]/g).toString())
+                ) {
                   room.deck.field[i].push(card);
                   room.users[userindex].hand.splice(cardindex, 1)[0];
-                  room.users.map(user => (user.finished = false));
+                  room.users.map((user) => (user.finished = false));
                   updateField(room);
                   break;
                 }
@@ -181,12 +184,12 @@ module.exports = io => {
 
     socket.on('finish-move', ({ roomname }) => {
       const { room } = getRoom({ roomname, type: 'durak' });
-      const userindex = room.users.findIndex(user => user.id === socket.conn.id);
+      const userindex = room.users.findIndex((user) => user.id === socket.conn.id);
       if (userindex !== -1) {
         room.users[userindex].finished = !room.users[userindex].finished;
       }
-      const finishedUsers = room.users.filter(user => user.finished === true);
-      const actionUsers = room.users.filter(user => user.status !== 'other');
+      const finishedUsers = room.users.filter((user) => user.finished === true);
+      const actionUsers = room.users.filter((user) => user.status !== 'other');
       if (finishedUsers.length === actionUsers.length) {
         updateOrder(room);
       }
