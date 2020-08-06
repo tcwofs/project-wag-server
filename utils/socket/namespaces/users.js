@@ -7,7 +7,7 @@ const addUser = ({ id, username, socket }) => {
     return { existingUserError: 'Username is existing. You will be redirected to home page' };
   }
 
-  const user = { id, username, socket, chatRooms: [], rooms: [] };
+  const user = { id, username, socket };
   users.push(user);
 
   return 0;
@@ -26,16 +26,4 @@ const removeUser = ({ id }) => {
 
 const getUser = ({ socket }) => users.find((user) => user.socket === socket);
 
-const addChatRoomToUser = ({ userid, roomid }) => {
-  const userindex = users.findIndex((user) => user.id === userid);
-  const room = getChatRoom({ roomid });
-  users[userindex].chatRooms.push({ id: room.id, roomane: room.roomname });
-};
-
-// const addRoomToUser = ({ userid, roomid, type }) => {
-//   const userindex = users.findIndex((user) => user.id === userid);
-//   const room = getRoom({ roomid });
-//   users[userindex].chatRooms.push({ id: room.id, roomane: room.roomname });
-// };
-
-module.exports = { addUser, removeUser, getUser, addChatRoomToUser };
+module.exports = { addUser, removeUser, getUser };

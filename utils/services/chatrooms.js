@@ -17,7 +17,7 @@ const addChatRoom = ({ roomname, user, password, privateRoom }) => {
   }
 
   const id = uuidv4();
-  const room = { id, roomname, host: user, users: [user], password: !!password, privateRoom };
+  const room = { id, roomname, host: user, users: [user], password: !!password, privateRoom, messages: [] };
 
   if (password) {
     const roomPassword = { id, password };
@@ -30,7 +30,7 @@ const addChatRoom = ({ roomname, user, password, privateRoom }) => {
 };
 
 const removeChatRoom = ({ roomname }) => {
-  const index = chatRooms.findIndex((room) => room.roomane === roomname);
+  const index = chatRooms.findIndex((room) => room.roomname === roomname);
   if (chatRooms[index].password) {
     const indexPassword = roomPasswords.findIndex((room) => room.id === chatRooms[index].id);
     if (index !== -1) {
@@ -56,9 +56,12 @@ const getChatRoom = ({ roomname }) => {
 const getChatRooms = ({ socket }) =>
   chatRooms.filter((room) => room.privateRoom === false && room.users.filter((user) => user.socket === socket).length === 0);
 
+const getUserRooms = ({ userid }) => chatRooms.filter((room) => room.users.filter((user) => user.id === userid).length === 1);
+
 const addUserToRoom = ({ room, password, user }) => {
   const passwordRoom = roomPasswords.find((el) => el.id === room.id);
-  if (room && user) {
+  const existingUser = chatRooms.map((room) => room.users.findIndex((item) => item.id === user.id));
+  if (room && existingUser[0] === -1) {
     if (!passwordRoom || (passwordRoom.password && passwordRoom.password === password)) {
       room.users.push(user);
       return 0;
@@ -66,20 +69,61 @@ const addUserToRoom = ({ room, password, user }) => {
       return { error: 'Incorrect password!' };
     }
   }
-  return { error: 'No such room!' };
+  return { errorConnected: 'Already connected' };
 };
 
-const removeUserFromRoom = ({ id }) => {
-  let room = chatRooms.find((room) => room.users.find((user) => user.id === id));
-  if (room) {
-    const index = room.users.findIndex((user) => user.id === id);
+const removeUserFromRoom = ({ roomname, user }) => {
+  let roomIndex = chatRooms.findIndex((room) => room.roomname === roomname);
+  if (roomIndex !== -1) {
+    const userIndex = chatRooms[roomIndex].users.findIndex((item) => item.id === user.id);
 
-    if (index !== -1) {
-      const user = room.users.splice(index, 1)[0];
-      return { room, user };
+    if (userIndex !== -1) {
+      chatRooms[roomIndex].users.splice(userIndex, 1);
+      if (chatRooms[roomIndex].users.length === 0) {
+        removeChatRoom({ roomname });
+      }
+      return 0;
     }
   }
   return { error: 'Could not remove user from room' };
 };
 
-module.exports = { addChatRoom, removeChatRoom, getChatRooms, getChatRoom, addUserToRoom, removeUserFromRoom };
+const getActiveUsersInRoom = ({ roomname }) => {
+  let roomIndex = chatRooms.findIndex((room) => room.roomname === roomname);
+  let users = [];
+  if (roomIndex !== -1) users = chatRooms[roomIndex].users;
+
+  return { users };
+};
+
+const removeUserFromAllRoom = ({ user }) => {
+  let indexes = [];
+  for (let i = 0; i < chatRooms.length; i++) {
+    for (let j = 0; j < chatRooms[i].users.length; j++) {
+      if (chatRooms[i].users[j].id === user.id) indexes.push({ room: i, user: j });
+    }
+  }
+
+  if (indexes.length !== 0) {
+    for (let i = indexes.length - 1; i >= 0; i--) {
+      chatRooms[indexes[i].room].users.splice(indexes[i].user, 1);
+      if (chatRooms[indexes[i].room].users.length === 0) {
+        removeChatRoom({ roomname: chatRooms[indexes[i].room].roomname });
+      }
+    }
+  }
+
+  return 0;
+};
+
+module.exports = {
+  addChatRoom,
+  removeChatRoom,
+  getChatRooms,
+  getChatRoom,
+  addUserToRoom,
+  removeUserFromRoom,
+  removeUserFromAllRoom,
+  getActiveUsersInRoom,
+  getUserRooms,
+};
