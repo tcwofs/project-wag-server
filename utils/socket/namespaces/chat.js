@@ -32,6 +32,8 @@ module.exports = (io) => {
       if (room) {
         const rooms = getUserRooms({ userid: user.id });
         socket.emit('get-user-chatrooms', { rooms });
+        chat.emit('emit-all-chatrooms');
+        chat.emit('emit-users');
       }
     });
 
@@ -44,6 +46,9 @@ module.exports = (io) => {
         if (!error) {
           const rooms = getUserRooms({ userid: user.id });
           socket.emit('get-user-chatrooms', { rooms });
+          chat.emit('emit-all-chatrooms');
+          chat.emit('emit-users');
+          chat.emit('emit-messages');
         }
       }
     });
@@ -61,16 +66,25 @@ module.exports = (io) => {
     socket.on('del-room', ({ roomname }) => {
       removeChatRoom({ roomname });
       chat.emit('emit-user-chatrooms');
+      chat.emit('emit-all-chatrooms');
+      chat.emit('emit-users');
     });
 
     socket.on('leave-room', ({ roomname }) => {
       removeUserFromRoom({ roomname, user });
       chat.emit('emit-user-chatrooms');
+      chat.emit('emit-all-chatrooms');
+      chat.emit('emit-users');
     });
 
     socket.on('get-users', ({ roomname }) => {
       const { users } = getActiveUsersInRoom({ roomname });
       socket.emit('get-users', { users });
+    });
+
+    socket.on('get-messages', ({ roomname }) => {
+      const { room } = getChatRoom({ roomname });
+      socket.emit('get-messages', { messages: room.messages });
     });
 
     socket.on('disconnect', () => {

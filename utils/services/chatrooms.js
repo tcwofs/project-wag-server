@@ -17,7 +17,21 @@ const addChatRoom = ({ roomname, user, password, privateRoom }) => {
   }
 
   const id = uuidv4();
-  const room = { id, roomname, host: user, users: [user], password: !!password, privateRoom, messages: [] };
+  const room = {
+    id,
+    roomname,
+    host: user,
+    users: [user],
+    password: !!password,
+    privateRoom,
+    messages: [
+      {
+        id: uuidv4(),
+        from: 'System',
+        text: `${user.username} connected`,
+      },
+    ],
+  };
 
   if (password) {
     const roomPassword = { id, password };
@@ -64,6 +78,7 @@ const addUserToRoom = ({ room, password, user }) => {
   if (room && existingUser[0] === -1) {
     if (!passwordRoom || (passwordRoom.password && passwordRoom.password === password)) {
       room.users.push(user);
+      room.messages.push({ id: uuidv4(), from: 'System', text: `${user.username} connected` });
       return 0;
     } else {
       return { error: 'Incorrect password!' };
@@ -98,6 +113,7 @@ const getActiveUsersInRoom = ({ roomname }) => {
 
 const removeUserFromAllRoom = ({ user }) => {
   let indexes = [];
+  if (!user) return;
   for (let i = 0; i < chatRooms.length; i++) {
     for (let j = 0; j < chatRooms[i].users.length; j++) {
       if (chatRooms[i].users[j].id === user.id) indexes.push({ room: i, user: j });
