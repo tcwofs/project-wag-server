@@ -9,7 +9,8 @@ const {
   removeUserFromRoom,
   getActiveUsersInRoom,
   removeUserFromAllRoom,
-} = require('../../services/chatrooms');
+  pushMessage,
+} = require('../../services/chat');
 
 module.exports = (io) => {
   const chat = io.of('/chat');
@@ -47,8 +48,8 @@ module.exports = (io) => {
           const rooms = getUserRooms({ userid: user.id });
           socket.emit('get-user-chatrooms', { rooms });
           chat.emit('emit-all-chatrooms');
-          chat.emit('emit-users');
-          chat.emit('emit-messages');
+          socket.broadcast.emit('emit-users');
+          socket.broadcast.emit('emit-messages');
         }
       }
     });
@@ -87,8 +88,15 @@ module.exports = (io) => {
       socket.emit('get-messages', { messages: room.messages });
     });
 
+    socket.on('send-message', ({ message, roomname, user }) => {
+      pushMessage({ message, roomname, user });
+      socket.broadcast.emit('emit-messages');
+    });
+
     socket.on('disconnect', () => {
       removeUserFromAllRoom({ user });
+      socket.broadcast.emit('emit-users');
+      socket.broadcast.emit('emit-messages');
       console.log(`User ${socket.id} left '/chatrooms'!`);
     });
   });
