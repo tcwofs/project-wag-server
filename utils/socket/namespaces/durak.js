@@ -1,46 +1,23 @@
-const { getUser } = require('./users');
-const { getRoom, removeRoom, removeUserFromRoom } = require('../../services/rooms');
+const { removeUserFromAllRoom, getRoomByID } = require('../../services/rooms');
 const { createDeck, giveStatus } = require('../../services/durak');
+const { getUser } = require('../../services/users');
 
 module.exports = (io) => {
   const durak = io.of('/durak');
   durak.on('connection', (socket) => {
     console.log(`User ${socket.id} connected to a '/durak'!`);
 
-    const user = getUser(socket.conn.id);
-
-    if (!user) {
-      socket.emit('error-redirect', { error: 'Error occured you will be redirected to home page' });
-      return;
-    }
-
-    const allowStartGame = (room) => {
-      const usersReady = room.users.filter((user) => user.ready === true);
-      if (room.users.length > 1 && room.users.length === usersReady.length) {
-        durak.in(`${room.id}_${room.roomname}`).emit('start-game');
-        room.active = false;
-        startGame(room);
-      }
-    };
-
-    const startGame = (room) => {
-      const { deck, users } = createDeck(room.users);
-      room.deck = deck;
-      room.users = users;
-      updateField(room);
-    };
-
     const updateField = (room) => {
       room.users.map((user) => {
         let userhands = room.users.reduce((filtered, filteruser) => {
           if (filteruser.id !== user.id) {
-            let someNewValue = { id: filteruser.id, username: filteruser.username, handlength: filteruser.hand.length };
+            let someNewValue = { id: filteruser.id, username: filteruser.username, socket: filteruser.socket, handlength: filteruser.hand.length };
             filtered.push(someNewValue);
           }
           return filtered;
         }, []);
 
-        durak.to(`/durak#${user.id}`).emit('handcards', {
+        durak.to(`/durak#${user.socket}`).emit('handcards', {
           recievedUserhand: user.hand,
           allcards: {
             field: room.deck.field,
@@ -57,7 +34,9 @@ module.exports = (io) => {
     const updateOrder = (room) => {
       const lostuser = room.users.filter((user) => user.hand.length !== 0);
       if (room.deck.cards.length === 0 && lostuser.length === 1) {
-        durak.in(`${room.id}_${room.roomname}`).emit('finish-game', { lostuser: lostuser[0] });
+        room.users.map((user) => {
+          durak.to(`/durak#${user.socket}`).emit('finish-game', { lostuser: lostuser[0] });
+        });
       }
       const userDefenceIndex = room.users.findIndex((user) => user.status === 'defending');
 
@@ -98,26 +77,27 @@ module.exports = (io) => {
       updateField(room);
     };
 
-    socket.on('connect-room', ({ roomname }) => {
-      const { room } = getRoom({ roomname, type: 'durak' });
-      socket.join(`${room.id}_${room.roomname}`);
-      setInterval(() => socket.emit('get-room-users', { activeUsers: room.users }), 1000);
-    });
-
-    socket.on('user-ready', ({ roomname }) => {
-      const { room } = getRoom({ roomname, type: 'durak' });
-      const index = room.users.findIndex((user) => user.id === socket.conn.id);
-      if (index !== -1) {
-        room.users[index].ready = !room.users[index].ready;
-        allowStartGame(room);
-        return;
+    socket.on('get-room-durak', ({ roomId, user }) => {
+      const { room } = getRoomByID({ roomId });
+      if (!room) return socket.emit('error-redirect', { error: 'Room is not found' });
+      const userInRoom = room.users.find((item) => item.id === user.id);
+      if (!userInRoom) return socket.emit('error-redirect', { error: 'You are not in this room' });
+      userInRoom.start = true;
+      const usersReady = room.users.filter((user) => user.start === true);
+      if (room.users.length > 1 && room.users.length === usersReady.length) {
+        room.users.map((user) => {
+          user.start = false;
+        });
+        const { deck, users } = createDeck(room.users);
+        room.deck = deck;
+        room.users = users;
+        updateField(room);
       }
-      socket.emit('error-redirect', { error: 'Error occured you will be redirected to home page' });
     });
 
-    socket.on('attack', ({ card, roomname, second }) => {
-      const { room } = getRoom({ roomname, type: 'durak' });
-      const userindex = room.users.findIndex((user) => user.id === socket.conn.id);
+    socket.on('attack', ({ card, roomId, second }) => {
+      const { room } = getRoomByID({ roomId });
+      const userindex = room.users.findIndex((user) => user.socket === socket.conn.id);
       if (room.deck.field.length === 6) return;
       if (
         room.users.filter((user) => user.status === 'defending' && room.deck.field.filter((row) => row.length % 2 !== 0).length === user.hand.length)
@@ -152,9 +132,9 @@ module.exports = (io) => {
       }
     });
 
-    socket.on('defence', ({ card, roomname }) => {
-      const { room } = getRoom({ roomname, type: 'durak' });
-      const userindex = room.users.findIndex((user) => user.id === socket.conn.id);
+    socket.on('defence', ({ card, roomId }) => {
+      const { room } = getRoomByID({ roomId });
+      const userindex = room.users.findIndex((user) => user.socket === socket.conn.id);
       if (userindex !== -1) {
         const cardindex = room.users[userindex].hand.findIndex((delcard) => delcard === card);
         if (cardindex !== -1) {
@@ -182,9 +162,9 @@ module.exports = (io) => {
       }
     });
 
-    socket.on('finish-move', ({ roomname }) => {
-      const { room } = getRoom({ roomname, type: 'durak' });
-      const userindex = room.users.findIndex((user) => user.id === socket.conn.id);
+    socket.on('finish-move', ({ roomId }) => {
+      const { room } = getRoomByID({ roomId });
+      const userindex = room.users.findIndex((user) => user.socket === socket.conn.id);
       if (userindex !== -1) {
         room.users[userindex].finished = !room.users[userindex].finished;
       }
@@ -195,15 +175,31 @@ module.exports = (io) => {
       }
     });
 
+    socket.on('play-again', ({ roomId }) => {
+      const { room } = getRoomByID({ roomId });
+      const userindex = room.users.findIndex((user) => user.socket === socket.conn.id);
+      if (userindex !== -1) {
+        room.users[userindex].start = true;
+      }
+      console.log(room.users);
+      if (
+        room.users.filter((item) => item.start === true).length > 1 &&
+        room.users.filter((item) => item.start === true).length === room.users.length
+      ) {
+        room.users.map((item) => {
+          durak.to(`/durak#${item.socket}`).emit('play-again');
+        });
+      }
+    });
+
     socket.on('disconnect', () => {
       console.log(`User ${socket.id} left '/durak'!`);
-      const { error, room, user } = removeUserFromRoom({ id: socket.conn.id });
+      const user = getUser({ socket: socket.conn.id });
+      const { error, room } = removeUserFromAllRoom({ user });
       if (!error) {
-        socket.leave(`${room.id}_${room.roomname}`);
-        durak.in(`${room.id}_${room.roomname}`).emit('finish-game', { lostuser: user });
-        if (room.users.length === 0) {
-          removeRoom(room.id);
-        }
+        room.users.map((item) => {
+          durak.to(`/durak#${item.socket}`).emit('finish-game', { lostuser: user });
+        });
       }
     });
   });

@@ -41,7 +41,7 @@ const cards = [
   '14C',
 ];
 
-const shuffleDeck = array => {
+const shuffleDeck = (array) => {
   let currentIndex = array.length,
     temporaryValue,
     randomIndex;
@@ -61,7 +61,7 @@ const shuffleDeck = array => {
   return array;
 };
 
-const createDeck = recievedUsers => {
+const createDeck = (recievedUsers) => {
   const localcards = shuffleDeck(shuffleDeck([...cards]));
   const lastcard = localcards.slice(-1);
   let deck = { field: [], draft: [], cards: localcards, lastcard };
@@ -70,7 +70,7 @@ const createDeck = recievedUsers => {
     let hand = deck.cards.splice(0, 6);
     let lowest = 99;
 
-    hand.map(card => {
+    hand.map((card) => {
       let cardChar = card.match(/[SHDC]/g).toString();
       let cardNum = parseInt(card.match(/[0-9]+/g));
       let lastcardChar = lastcard[0].match(/[SHDCU]/g).toString();
@@ -84,6 +84,7 @@ const createDeck = recievedUsers => {
     const user = {
       id: recievedUsers[i].id,
       username: recievedUsers[i].username,
+      socket: recievedUsers[i].socket,
       hand,
       length: hand.length,
       status: 'other',

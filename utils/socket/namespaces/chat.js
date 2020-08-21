@@ -1,4 +1,4 @@
-const { getUser } = require('./users');
+const { getUser } = require('../../services/users');
 const {
   addChatRoom,
   getChatRooms,

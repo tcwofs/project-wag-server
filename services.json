@@ -2,29 +2,28 @@
   {
     "id": 2,
     "name": "rock-paper-scissors",
-    "overview": "A rps game",
+    "overview": "a rps game (2 users)",
     "path": "/rps",
     "type": "rps",
-    "rules": "a",
-
+    "rules": " Lorem ipsum dolor, sit amet consectetur adipisicing elit. Incidunt nostrum modi consequuntur iste deleniti qui aut numquam quam! Aliquid beatae aspernatur inventore reiciendis facere veniam accusantium maxime vero modi in.",
     "maxUsers": 2
   },
   {
     "id": 3,
     "name": "durak",
-    "overview": "A durak game",
+    "overview": "a durak game (2-4 users)",
     "path": "/durak",
     "type": "durak",
-    "rules": "a",
+    "rules": " Lorem ipsum dolor, sit amet consectetur adipisicing elit. Incidunt nostrum modi consequuntur iste deleniti qui aut numquam quam! Aliquid beatae aspernatur inventore reiciendis facere veniam accusantium maxime vero modi in.",
     "maxUsers": 4
   },
   {
     "id": 4,
     "name": "tic-tac-toe",
-    "overview": "A tic-tac-toe game",
+    "overview": "a tic-tac-toe game (2 users)",
     "path": "/ttt",
     "type": "ttt",
-    "rules": "a",
+    "rules": "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Incidunt nostrum modi consequuntur iste deleniti qui aut numquam quam! Aliquid beatae aspernatur inventore reiciendis facere veniam accusantium maxime vero modi in.",
     "maxUsers": 2
   }
 ]

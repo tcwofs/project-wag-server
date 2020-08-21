@@ -1,4 +1,4 @@
-const { getUser } = require('./users');
+const { getUser } = require('../../services/users');
 const { getRoom, removeRoom, removeUserFromRoom } = require('../../services/rooms');
 const { createDeck, giveStatus } = require('../../services/ttt');
 
