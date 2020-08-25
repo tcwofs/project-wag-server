@@ -1,5 +1,16 @@
-const { getUser } = require('./users');
-const { addChatRoom, getChatRooms, getChatRoom, removeChatRoom, addUserToRoom } = require('../../services/chatrooms');
+const { getUser } = require('../../services/users');
+const {
+  addChatRoom,
+  getChatRooms,
+  getChatRoom,
+  removeChatRoom,
+  addUserToRoom,
+  getUserRooms,
+  removeUserFromRoom,
+  getActiveUsersInRoom,
+  removeUserFromAllRoom,
+  pushMessage,
+} = require('../../services/chat');
 
 module.exports = (io) => {
   const chat = io.of('/chat');
@@ -18,28 +29,28 @@ module.exports = (io) => {
 
     socket.on('new-chat-room', ({ roomname, password, privateRoom }) => {
       const { error, room } = addChatRoom({ roomname, user, password, privateRoom });
-      if (error) {
-        socket.emit('new-chat-room-confirmed', { error });
-      } else if (room) {
-        user.chatRooms.push({ id: room.id, roomname: room.roomname, host: room.host.id });
-        socket.emit('new-chat-room-confirmed', { error });
-        socket.emit('get-user-chatrooms', { rooms: user.chatRooms });
+      socket.emit('new-chat-room-confirmed', { error });
+      if (room) {
+        const rooms = getUserRooms({ userid: user.id });
+        socket.emit('get-user-chatrooms', { rooms });
+        chat.emit('emit-all-chatrooms');
+        chat.emit('emit-users');
       }
     });
 
     socket.on('connect-chat-room', ({ roomname, password }) => {
       const { error, room } = getChatRoom({ roomname });
-      if (error) {
-        socket.emit('connect-chat-room-confirmed', { errorRoom: error });
-      } else if (room) {
-        const { error } = addUserToRoom({ room, password, user });
-        if (error) {
-          socket.emit('connect-chat-room-confirmed', { errorPassword: error });
-          return;
+      socket.emit('connect-chat-room-confirmed', { errorRoom: error });
+      if (room) {
+        const { error, errorConnected } = addUserToRoom({ room, password, user });
+        socket.emit('connect-chat-room-confirmed', { errorPassword: error, errorRoom: errorConnected });
+        if (!error) {
+          const rooms = getUserRooms({ userid: user.id });
+          socket.emit('get-user-chatrooms', { rooms });
+          chat.emit('emit-all-chatrooms');
+          socket.broadcast.emit('emit-users');
+          socket.broadcast.emit('emit-messages');
         }
-        user.chatRooms.push({ id: room.id, roomname: room.roomname, host: room.host.id });
-        socket.emit('connect-chat-room-confirmed', { errorPassword: error });
-        socket.emit('get-user-chatrooms', { rooms: user.chatRooms });
       }
     });
 
@@ -48,17 +59,44 @@ module.exports = (io) => {
       socket.emit('get-all-chatrooms', { rooms });
     });
 
+    socket.on('get-user-chatrooms', () => {
+      const rooms = getUserRooms({ userid: user.id });
+      socket.emit('get-user-chatrooms', { rooms });
+    });
+
     socket.on('del-room', ({ roomname }) => {
-      const rooms = getChatRooms();
-      socket.emit('get-all-chatrooms', { rooms });
+      removeChatRoom({ roomname });
+      chat.emit('emit-user-chatrooms');
+      chat.emit('emit-all-chatrooms');
+      chat.emit('emit-users');
+    });
+
+    socket.on('leave-room', ({ roomname }) => {
+      removeUserFromRoom({ roomname, user });
+      chat.emit('emit-user-chatrooms');
+      chat.emit('emit-all-chatrooms');
+      chat.emit('emit-users');
     });
 
     socket.on('get-users', ({ roomname }) => {
       const { users } = getActiveUsersInRoom({ roomname });
-      console.log(users);
+      socket.emit('get-users', { users });
+    });
+
+    socket.on('get-messages', ({ roomname }) => {
+      const { room } = getChatRoom({ roomname });
+      socket.emit('get-messages', { messages: room.messages });
+    });
+
+    socket.on('send-message', ({ message, roomname, user }) => {
+      pushMessage({ message, roomname, user });
+      socket.broadcast.emit('emit-messages');
     });
 
     socket.on('disconnect', () => {
+      removeUserFromAllRoom({ user });
+      socket.broadcast.emit('emit-users');
+      socket.broadcast.emit('emit-messages');
       console.log(`User ${socket.id} left '/chatrooms'!`);
     });
   });

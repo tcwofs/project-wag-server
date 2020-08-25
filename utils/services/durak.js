@@ -41,7 +41,7 @@ const cards = [
   '14C',
 ];
 
-const shuffleDeck = array => {
+const shuffleDeck = (array) => {
   let currentIndex = array.length,
     temporaryValue,
     randomIndex;
@@ -61,7 +61,7 @@ const shuffleDeck = array => {
   return array;
 };
 
-const createDeck = recievedUsers => {
+const createDeck = (recievedUsers) => {
   const localcards = shuffleDeck(shuffleDeck([...cards]));
   const lastcard = localcards.slice(-1);
   let deck = { field: [], draft: [], cards: localcards, lastcard };
@@ -70,7 +70,7 @@ const createDeck = recievedUsers => {
     let hand = deck.cards.splice(0, 6);
     let lowest = 99;
 
-    hand.map(card => {
+    hand.map((card) => {
       let cardChar = card.match(/[SHDC]/g).toString();
       let cardNum = parseInt(card.match(/[0-9]+/g));
       let lastcardChar = lastcard[0].match(/[SHDCU]/g).toString();
@@ -84,6 +84,7 @@ const createDeck = recievedUsers => {
     const user = {
       id: recievedUsers[i].id,
       username: recievedUsers[i].username,
+      socket: recievedUsers[i].socket,
       hand,
       length: hand.length,
       status: 'other',
@@ -131,4 +132,74 @@ const giveStatus = (users, first) => {
   return users;
 };
 
-module.exports = { createDeck, giveStatus };
+const updateField = ({ room, durak }) => {
+  room.users.map((user) => {
+    let userhands = room.users.reduce((filtered, filteruser) => {
+      if (filteruser.id !== user.id) {
+        let someNewValue = { id: filteruser.id, username: filteruser.username, socket: filteruser.socket, handlength: filteruser.hand.length };
+        filtered.push(someNewValue);
+      }
+      return filtered;
+    }, []);
+
+    durak.to(`/main#${user.socket}`).emit('handcards', {
+      recievedUserhand: user.hand,
+      allcards: {
+        field: room.deck.field,
+        lastcard: room.deck.lastcard,
+        cardcount: room.deck.cards.length,
+      },
+      userhands,
+      status: user.status,
+      finished: user.finished,
+    });
+  });
+};
+
+const updateOrder = ({ room, durak }) => {
+  const lostuser = room.users.filter((user) => user.hand.length !== 0);
+  if (room.deck.cards.length === 0 && lostuser.length === 1) {
+    room.users.map((user) => {
+      durak.to(`/main#${user.socket}`).emit('finish-game', { lostuser: lostuser[0] });
+    });
+  }
+  const userDefenceIndex = room.users.findIndex((user) => user.status === 'defending');
+
+  let first = 0;
+  let draft = room.deck.field.filter((row) => row.length % 2 === 0).length === room.deck.field.length;
+  let fieldcards = room.deck.field.splice(0);
+
+  if (draft) {
+    for (let i = 0; i < fieldcards.length; i++) {
+      for (let j = 0; j < fieldcards[i].length; j++) {
+        room.deck.draft.push(fieldcards[i][j]);
+      }
+    }
+    first = userDefenceIndex;
+  } else {
+    for (let i = 0; i < fieldcards.length; i++) {
+      for (let j = 0; j < fieldcards[i].length; j++) {
+        room.users[userDefenceIndex].hand.push(fieldcards[i][j]);
+      }
+    }
+    first = userDefenceIndex + 1;
+  }
+
+  const userswithoutcards = room.users.filter((user) => user.hand.length < 6);
+  userswithoutcards.map((user) => {
+    user.hand = user.hand.concat(room.deck.cards.splice(0, 6 - user.hand.length));
+  });
+
+  room.users.map((user) => {
+    user.finished = false;
+    user.status = 'other';
+  });
+
+  room.users = giveStatus(
+    room.users.filter((user) => user.hand.length !== 0),
+    first
+  );
+  updateField({ room, durak });
+};
+
+module.exports = { createDeck, updateField, updateOrder };

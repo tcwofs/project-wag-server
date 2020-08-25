@@ -1,30 +1,11 @@
 [
   {
-    "id": 2,
-    "name": "rock-paper-scissors",
-    "overview": "A rps game",
-    "path": "/rps",
-    "type": "rps",
-    "rules": "a",
-
-    "maxUsers": 2
-  },
-  {
-    "id": 3,
+    "id": 1,
     "name": "durak",
-    "overview": "A durak game",
+    "overview": "a durak game (2-4 users)",
     "path": "/durak",
     "type": "durak",
-    "rules": "a",
+    "rules": " Lorem ipsum dolor, sit amet consectetur adipisicing elit. Incidunt nostrum modi consequuntur iste deleniti qui aut numquam quam! Aliquid beatae aspernatur inventore reiciendis facere veniam accusantium maxime vero modi in.",
     "maxUsers": 4
-  },
-  {
-    "id": 4,
-    "name": "tic-tac-toe",
-    "overview": "A tic-tac-toe game",
-    "path": "/ttt",
-    "type": "ttt",
-    "rules": "a",
-    "maxUsers": 2
   }
 ]

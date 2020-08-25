@@ -7,7 +7,6 @@ module.exports.listen = (app) => {
   require('./namespaces/chat')(io);
   require('./namespaces/rooms')(io);
   require('./namespaces/durak')(io);
-  require('./namespaces/ttt')(io);
 
   return io;
 };

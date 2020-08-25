@@ -1,4 +1,4 @@
-const { addUser, removeUser } = require('./users');
+const { addUser, removeUser } = require('../../services/users');
 
 module.exports = (io) => {
   const login = io.of('/login');
