@@ -5,9 +5,10 @@ const {
   getRooms,
   addUserToRoom,
   getRoom,
-  removeUserFromAllRoom,
+
   removeUserFromRoom,
 } = require('../../services/rooms');
+const { createDeck, updateField } = require('../../services/durak');
 
 module.exports = (io) => {
   const rooms = io.of('/main');
@@ -82,6 +83,12 @@ module.exports = (io) => {
         const usersReady = room.users.filter((user) => user.ready === true);
         if (room.users.length > 1 && room.users.length === usersReady.length) {
           rooms.to(`${room.id}_${room.roomname}`).emit('start-game');
+          const { deck, users } = createDeck(room.users);
+          room.deck = deck;
+          room.users = users;
+          setTimeout(() => {
+            updateField({ room, durak: rooms });
+          }, 500);
           room.active = false;
           socket.broadcast.emit('emit-all-rooms');
         }
@@ -89,7 +96,6 @@ module.exports = (io) => {
     });
 
     socket.on('disconnect', () => {
-      removeUserFromAllRoom({ user });
       socket.broadcast.emit('emit-all-rooms');
       socket.broadcast.emit('emit-room-users');
       console.log(`User ${socket.conn.id} left '/rooms'!`);

@@ -100,17 +100,19 @@ const removeRoom = ({ roomname }) => {
   }
 };
 
-const removeUserFromAllRoom = ({ user }) => {
-  let room;
+const removeUserFromAllRoom = ({ user, durak }) => {
+  if (!user) return { error: 'User is undefined' };
   let roomIndex = rooms.findIndex((room) => room.users.find((item) => item.id === user.id));
   if (roomIndex !== -1) {
     let userIndex = rooms[roomIndex].users.findIndex((item) => item.id === user.id);
     if (userIndex !== -1) {
-      room = rooms[roomIndex];
+      rooms[roomIndex].users.map((item) => {
+        durak.to(`/main#${item.socket}`).emit('finish-game', { lostuser: user });
+      });
+      rooms[roomIndex].users.splice(userIndex, 1);
       if (rooms[roomIndex].users.length === 0) {
         removeRoom({ roomname: rooms[roomIndex].roomname });
       }
-      return { room };
     }
     return { error: 'Could not find user' };
   }
